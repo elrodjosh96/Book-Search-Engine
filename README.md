@@ -63,13 +63,13 @@ WHEN I click on the Logout button
 THEN I am logged out of the site and presented with a menu with the options Search for Books and Login/Signup and an input field to search for books and a submit button  
 ```
 ## Installation
-
+After downloading this onto your machine, you will wont to cd into both the Client files and Server files and npm install on both. Then you can cd back into BOOK-SEARCH-ENGINE and npm install and npm run develop to get the localhost server running.
 ## Usage
 
 ## Contribution
 
 ## Test 
-After downloading this onto your machine, you will wont to cd into both the Client files and Server files and npm install on both. Then you can cd back into BOOK-SEARCH-ENGINE and npm install and npm run develop to get the localhost server running.
+
 ## License
 This app is using The MIT License
 ## Questions
