@@ -1,19 +1,27 @@
 import React from 'react';
 import { useMutation, useQuery } from '@apollo/client';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
 
 import Auth from '../utils/auth';
 import { REMOVE_BOOK } from '../utils/mutations';
 import { GET_ME } from '../utils/queries';
+import { removeBookId } from '../utils/localStorage';
 
-const SavedBooks = ({ username, savedBooks }) => {
-  const [userData, setUserData] = useQuery(GET_ME);
-  const [removeBook, { error }] = useMutation(REMOVE_BOOK);
+const SavedBooks = () => {
+  const { loading, data } = useQuery(GET_ME);
+  const [deleteBook, { err }] = useMutation(REMOVE_BOOK);
 
-  // use this to determine if `useEffect()` hook needs to run again
-  const userDataLength = Object.keys(userData).length;
+  const token = Auth.loggedIn() ? Auth.getToken() : null;
 
+  if (!token) {
+    return false;
+  }
+
+  const userData = data?.me || {}
+  
+  console.log(data)
+  console.log(userData)
   // useEffect(() => {
   //   const getUserData = async () => {
   //     try {
@@ -48,23 +56,23 @@ const SavedBooks = ({ username, savedBooks }) => {
     }
 
     try {
-      const response = await removeBook(bookId, token);
+      const { data } = await deleteBook({
+        variables: {bookId: bookId}
+      })
 
-      if (!response.ok) {
+      if (err) {
         throw new Error('something went wrong!');
       }
 
-      const updatedUser = await response.json();
-      setUserData(updatedUser);
       // upon success, remove book's id from localStorage
-      removeBook(bookId);
+      removeBookId(bookId);
     } catch (err) {
       console.error(err);
     }
   };
 
   // if data isn't here yet, say so
-  if (!userDataLength) {
+  if (loading) {
     return <h2>LOADING...</h2>;
   }
 
@@ -75,15 +83,14 @@ const SavedBooks = ({ username, savedBooks }) => {
           <h1>Viewing saved books!</h1>
         </Container>
       </Jumbotron>
-      {Auth.loggedIn() ? (
       <Container>
         <h2>
-          {savedBooks.length
-            ? `Viewing ${savedBooks.length} saved ${savedBooks.length === 1 ? 'book' : 'books'}:`
+          {userData.savedBooks.length
+            ? `Viewing ${userData.savedBooks.length} saved ${userData.savedBooks.length === 1 ? 'book' : 'books'}:`
             : 'You have no saved books!'}
         </h2>
         <CardColumns>
-          {savedBooks.map((book) => {
+          {userData.savedBooks.map((book) => {
             return (
               <Card key={book.bookId} border='dark'>
                 {book.image ? <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' /> : null}
@@ -100,12 +107,6 @@ const SavedBooks = ({ username, savedBooks }) => {
           })}
         </CardColumns>
       </Container>
-      ) : (
-        <p>
-          Must be logged in to endorse skills. Please{' '}
-          <Link to="/login">login</Link> or <Link to="/signup">signup.</Link>
-        </p>
-      )}
     </>
   );
 };
